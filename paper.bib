@@ -8,3 +8,131 @@ Jennifer and Walker, David},
   pages={128--134},
   year={2013}
 }
+
+@inproceedings{Schmitt_2019, series={ANRW ’19},
+   title={Oblivious DNS: practical privacy for DNS queries: published in PoPETS 2019},
+   url={http://dx.doi.org/10.1145/3340301.3341128},
+   DOI={10.1145/3340301.3341128},
+   booktitle={Proceedings of the Applied Networking Research Workshop},
+   publisher={ACM},
+   author={Schmitt, Paul and Edmundson, Anne and Mankin, Allison and Feamster, Nick},
+   year={2019},
+   month=jul, pages={17–19},
+   collection={ANRW ’19} }
+
+@inproceedings{Jones2016DetectingDR,
+  title={Detecting DNS Root Manipulation},
+  author={Ben Jones and Nick Feamster and Vern Paxson and Nicholas C. Weaver and Mark Allman},
+  booktitle={Passive and Active Network Measurement Conference},
+  year={2016},
+  url={https://api.semanticscholar.org/CorpusID:16488139}
+}
+
+@misc{rfc7626,
+    series =    {Request for Comments},
+    number =    7626,
+    howpublished =  {RFC 7626},
+    publisher = {RFC Editor},
+    doi =       {10.17487/RFC7626},
+    url =       {https://www.rfc-editor.org/info/rfc7626},
+    author =    {Stéphane Bortzmeyer},
+    title =     {{DNS Privacy Considerations}},
+    pagetotal = 17,
+    year =      2015,
+    month =     aug,
+    abstract =  {This document describes the privacy issues associated with the use of the DNS by Internet users. It is intended to be an analysis of the present situation and does not prescribe solutions.},
+}
+
+@incollection{herrmann2012reidentification,
+  author    = {Herrmann, Dominik and Gerber, Christoph and Banse, Christian and Federrath, Hannes},
+  title     = {Analyzing Characteristic Host Access Patterns for Re-identification of Web User Sessions},
+  booktitle = {Information Security Technology for Applications},
+  editor    = {Aura, Tuomas and J{\"a}rvinen, Kimmo and Nyberg, Kaisa},
+  series    = {Lecture Notes in Computer Science},
+  volume    = {7127},
+  pages     = {136--154},
+  publisher = {Springer},
+  address   = {Berlin, Heidelberg},
+  year      = {2012},
+  doi       = {10.1007/978-3-642-27937-9_10}
+}
+
+@misc{rfc8484,
+    series =    {Request for Comments},
+    number =    8484,
+    howpublished =  {RFC 8484},
+    publisher = {RFC Editor},
+    doi =       {10.17487/RFC8484},
+    url =       {https://www.rfc-editor.org/info/rfc8484},
+    author =    {Paul E. Hoffman and Patrick McManus},
+    title =     {{DNS Queries over HTTPS (DoH)}},
+    pagetotal = 21,
+    year =      2018,
+    month =     oct,
+    abstract =  {This document defines a protocol for sending DNS queries and getting DNS responses over HTTPS. Each DNS query-response pair is mapped into an HTTP exchange.},
+}
+
+@misc{rfc7858,
+    series =    {Request for Comments},
+    number =    7858,
+    howpublished =  {RFC 7858},
+    publisher = {RFC Editor},
+    doi =       {10.17487/RFC7858},
+    url =       {https://www.rfc-editor.org/info/rfc7858},
+    author =    {Zi Hu and Liang Zhu and John Heidemann and Allison Mankin and Duane Wessels and Paul E. Hoffman},
+    title =     {{Specification for DNS over Transport Layer Security (TLS)}},
+    pagetotal = 19,
+    year =      2016,
+    month =     may,
+    abstract =  {This document describes the use of Transport Layer Security (TLS) to provide privacy for DNS. Encryption provided by TLS eliminates opportunities for eavesdropping and on-path tampering with DNS queries in the network, such as discussed in RFC 7626. In addition, this document specifies two usage profiles for DNS over TLS and provides advice on performance considerations to minimize overhead from using TCP and TLS with DNS. This document focuses on securing stub-to-recursive traffic, as per the charter of the DPRIVE Working Group. It does not prevent future applications of the protocol to recursive-to-authoritative traffic.},
+}
+
+@misc{cloudflare-dns-over-tls,
+  author       = {{Cloudflare, Inc.}},
+  title        = {DNS over TLS vs. DNS over HTTPS},
+  howpublished = {\url{https://www.cloudflare.com/learning/dns/dns-over-tls/}},
+  note         = {Accessed: 24 November 2025}
+}
+
+@misc{rfc9250,
+    series =    {Request for Comments},
+    number =    9250,
+    howpublished =  {RFC 9250},
+    publisher = {RFC Editor},
+    doi =       {10.17487/RFC9250},
+    url =       {https://www.rfc-editor.org/info/rfc9250},
+    author =    {Christian Huitema and Sara Dickinson and Allison Mankin},
+    title =     {{DNS over Dedicated QUIC Connections}},
+    pagetotal = 27,
+    year =      2022,
+    month =     may,
+    abstract =  {This document describes the use of QUIC to provide transport confidentiality for DNS. The encryption provided by QUIC has similar properties to those provided by TLS, while QUIC transport eliminates the head-of-line blocking issues inherent with TCP and provides more efficient packet-loss recovery than UDP. DNS over QUIC (DoQ) has privacy properties similar to DNS over TLS (DoT) specified in RFC 7858, and latency characteristics similar to classic DNS over UDP. This specification describes the use of DoQ as a general-purpose transport for DNS and includes the use of DoQ for stub to recursive, recursive to authoritative, and zone transfer scenarios.},
+}
+
+@inproceedings{10.1145/3517745.3561445,
+author = {Kosek, Mike and Schumann, Luca and Marx, Robin and Doan, Trinh Viet and Bajpai, Vaibhav},
+title = {DNS privacy with speed? evaluating DNS over QUIC and its impact on web performance},
+year = {2022},
+isbn = {9781450392594},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3517745.3561445},
+doi = {10.1145/3517745.3561445},
+abstract = {Over the last decade, Web traffic has significantly shifted towards HTTPS due to an increased awareness for privacy. However, DNS traffic is still largely unencrypted, which allows user profiles to be derived from plaintext DNS queries. While DNS over TLS (DoT) and DNS over HTTPS (DoH) address this problem by leveraging transport encryption for DNS, both protocols are constrained by the underlying transport (TCP) and encryption (TLS) protocols, requiring multiple round-trips to establish a secure connection. In contrast, QUIC combines the transport and cryptographic handshake into a single round-trip, which allows the recently standardized DNS over QUIC (DoQ) to provide DNS privacy with minimal latency. In the first study of its kind, we perform distributed DoQ measurements across multiple vantage points to evaluate the impact of DoQ on Web performance. We find that DoQ excels over DoH, leading to significant improvements with up to 10\% faster loads for simple webpages. With increasing complexity of webpages, DoQ even catches up to DNS over UDP (DoUDP) as the cost of encryption amortizes: With DoQ being only ~2\% slower than DoUDP, encrypted DNS becomes much more appealing for the Web.},
+booktitle = {Proceedings of the 22nd ACM Internet Measurement Conference},
+pages = {44–50},
+numpages = {7},
+keywords = {DNS over QUIC, DNS privacy, web performance},
+location = {Nice, France},
+series = {IMC '22}
+}
+
+@misc{laperdrix2019browserfingerprintingsurvey,
+      title={Browser Fingerprinting: A survey}, 
+      author={Pierre Laperdrix and Nataliia Bielova and Benoit Baudry and Gildas Avoine},
+      year={2019},
+      eprint={1905.01051},
+      archivePrefix={arXiv},
+      primaryClass={cs.CR},
+      url={https://arxiv.org/abs/1905.01051}, 
+}
