@@ -1,0 +1,92 @@
+\section{Methodology}\label{sec:method}
+
+\subsection{Overview}
+
+In our study we run two comparative tasks across protocols. First, we focus on activity profiling defined as inferring a browsing category and site. Second, we focus on user profiling in which users are distinguished by traffic patterns.
+
+For activity profiling, we visit 20 popular sites across 4 categories; each scripted visit yields one pcap between client and resolver and is transformed into one feature vector. For user profiling, we have five distinct user profiles (through separate VMs created via AWS EC2 instances). Each VM performs multiple controlled visits with a fresh browser profile per visit to avoid cache effects. Each visit again produces one pcap which is transformed into one feature vector.
+
+We record traffic at the client and proxy link and use the proxy and upstream queries as ground truth (domain/timing) for labeling each visit’s features. For feature extraction, we aggregate each pcap to a single per-visit vector covering timing (inter-arrivals, bursts, durations), size/volume (bytes, counts, packet-size stats), and connection dynamics (handshake duration, first-packet size, \#connections). For modeling and evaluation, we build three datasets (DoT/DoH/DoQ) and evaluate per-protocol performance and cross-protocol generalization. 
+
+\subsection{Resolver and Proxy Setup}
+
+All experiments run on a single host to keep network conditions, protocol behavior, and caching strictly controlled and reproducible. On this host, we deploy a two-tier resolver architecture consisting of a local dnsdist instance in front of a local PowerDNS Recursor instance.
+We use dnsdist as the front-end resolver because it natively supports DoT, DoH, and DoQ, and exposes each transport as a separate listener while sharing the same back-end configuration. This design allows us to switch between protocols simply by changing which dnsdist listener the client uses, without modifying the underlying resolver logic, caching policy, or upstream behavior. In contrast, many other resolver implementations either do not support DoQ at all or require distinct software stacks and configurations for each encrypted protocol, which would introduce additional variability across experiments. Using dnsdist therefore makes it straightforward to run reproducible experiments that isolate the effect of the encrypted transport itself.
+Dnsdist acts as the front-end encrypted resolver that the client queries. Depending on the experiment, the client sends DNS queries to dnsdist over DoT, DoH, or DoQ. This client to dnsdist hop represents the vantage point of an on-path observer who can see only the encrypted resolver traffic (IP addresses, ports, handshake metadata, packet sizes, and timings), but not the plaintext DNS message contents.
+Dnsdist is configured to forward all received queries to a PowerDNS Recursor running on the same host over standard, unencrypted DNS on port 53. This dnsdist to recursor hop exposes the full plaintext DNS query and response (including QNAMEs, RR types, and response codes) and serves as the ground truth for the experiments. Because both components run locally, we can (1) control caching behavior and (2) label traffic precisely by pairing each encrypted flow observed on the client to dnsdist link with the corresponding plaintext query/response observed on the dnsdist to recursor link.
+We run the PowerDNS Recursor in forwarding mode, directing all outgoing queries to the campus recursive resolvers at 128.135.164.141 and 128.135.24.141. Forwarding lets us leverage the campus resolvers’ cache (reflecting typical on-campus behavior), comply with network policies, and avoid managing full recursive resolution and DNSSEC policy ourselves. This configuration has clear visibility implications: inside our host, the dnsdist to recursor traffic is plaintext and provides the ground-truth labels we use in our analysis; from the recursor to the campus resolvers, queries are also sent in plaintext over port 53, so the campus resolvers (and any on-path devices) can observe the queried domain names. Our leakage measurements, however, rely only on the locally visible dnsdist to recursor hop for ground truth and on the encrypted client to dnsdist vantage point for what an external observer could see.
+This architecture allows us to treat the encrypted front-end traffic as a realistic external vantage point, while using the back-end plaintext traffic to obtain exact labels for each query when constructing datasets and evaluating leakage.
+
+\subsection{Activity Website Selection} 
+
+For selecting visiting websites, we used Top10.com to come up with the top five websites for each of our categories—news, shopping, social media, and streaming sites. This resulted in a set of 30 sites~\cite{top10com}.
+
+\subsection{Traffic Collection} 
+
+Rather than driving a full browser (e.g., via Selenium and Firefox) and capturing the DNS traffic that arises from loading web pages, we generate DNS workloads using dnsperf, a DNS benchmarking tool. Our goal is to study leakage from encrypted resolver traffic under tightly controlled conditions, not to model complete browser sessions. Using dnsperf allows us to specify an explicit list of domain names, control the query rate and concurrency, and replay the same workload across DoT, DoH, and DoQ without changing any other aspect of the system. In contrast, a Selenium-based approach would introduce substantial variability from browser behavior, including caching, prefetching, and ads, making it more difficult to attribute differences in observability to the transport protocol itself. We therefore favor a dnsperf-based workload to maximize control and reproducibility. In our final dataset, we select approximately 30 websites and perform 20 repeated runs per website per protocol, yielding about 600 encrypted captures per protocol.
+
+For each website and each protocol (DoT, DoH, DoQ), we perform an isolated run. First, we start a packet capture on the loopback interface that filters for the client to dnsdist traffic on the protocol-specific port. Then, we drive a single dnsperf with the per-site query, targeting the appropriate dnsdist listener. For instance:
+\begin{verbatim}
+dnsperf -d site_i.txt -s 127.0.0.1 -p 8853 -m dot -Q 100 -l 20
+\end{verbatim}
+Here, \texttt{site\_i.txt} contains only queries for a single website, \texttt{-m} selects the encrypted transport (DoT/DoH/DoQ), and \texttt{-Q} / \texttt{-l} control the query rate and duration. By using a relatively high query rate and non-trivial duration, we ensure that each run produces hundreds to thousands of encrypted packets. For each run, dnsperf establishes a single long-lived connection to dnsdist (e.g., one TCP/TLS connection for DoT) and sends all queries for that site over that connection. When the dnsperf run completes, we stop the capture and save it as a pcap specific to that website and protocol (e.g., \texttt{enc\_dot\_site\_i\_run\_j.pcap}). In parallel, we capture the plaintext dnsdist to PowerDNS traffic on the same host. Because each run is restricted to a single site’s query file, the plaintext trace for that run contains only the queries associated with that site, and the corresponding encrypted pcap contains exactly one encrypted connection carrying only that site’s workload. 
+
+This design yields one sample (feature vector) per run. It avoids the ambiguity of mixed-workload runs where multiple websites are multiplexed into a single long-lived connection and cannot be cleanly separated in the encrypted trace, while also providing a moderate-sized dataset of roughly 600 samples per protocol for subsequent modeling.
+
+\subsection{Feature Extraction} 
+
+For each per-website, per-protocol capture, we extract only the metadata
+that would be visible to an on-path observer of encrypted resolver traffic.
+We process the encrypted pcaps with \texttt{tshark}. In all cases, we request
+the same set of fields (where available), grouped conceptually as follows:
+
+\vspace{0.5em}
+\begin{small}
+
+\noindent\textbf{Packet- and IP-level fields}\\
+\begin{tabular}{@{}p{0.45\linewidth}p{0.45\linewidth}@{}}
+\texttt{frame.len, ip.len, ip.ttl, ip.proto} &
+\texttt{ip.src, ip.dst}
+\end{tabular}
+
+\vspace{0.75em}
+\noindent\textbf{TCP-level fields (connection dynamics)}\\
+\begin{tabular}{@{}p{0.45\linewidth}p{0.45\linewidth}@{}}
+\texttt{tcp.srcport, tcp.dstport, tcp.hdr\_len, tcp.flags, tcp.window\_size\_value, tcp.window\_size\_scalefactor} &
+\texttt{tcp.time\_relative, tcp.time\_delta, tcp.analysis.initial\_rtt, tcp.analysis.bytes\_in\_flight, tcp.analysis.push\_bytes\_sent}
+\end{tabular}
+
+\vspace{0.75em}
+\noindent\textbf{TLS record-layer fields}\\
+\begin{tabular}{@{}p{0.45\linewidth}p{0.45\linewidth}@{}}
+\texttt{tls.record.content\_type, tls.record.version, tls.record.length} &
+\texttt{tls.record.opaque\_type, tls.app\_data}
+\end{tabular}
+
+\vspace{0.75em}
+\noindent\textbf{TLS handshake and extension fields}\\
+\begin{tabular}{@{}p{0.45\linewidth}p{0.45\linewidth}@{}}
+\texttt{tls.handshake.type, tls.handshake.version, tls.handshake.ciphersuite, tls.handshake.extensions\_length, tls.handshake.extension.type, tls.handshake.extensions.session\_ticket, tls.handshake.extensions.supported\_versions\_len, tls.handshake.extensions.supported\_version, tls.extension.psk\_ke\_modes\_length, tls.extension.psk\_ke\_mode} &
+\texttt{tls.handshake.extensions\_key\_share\_client\_length, tls.handshake.extensions\_key\_share\_group, tls.handshake.extensions\_ec\_point\_formats\_length, tls.handshake.extensions\_supported\_groups\_length, tls.handshake.extensions\_supported\_group, tls.handshake.extensions\_alpn\_len, tls.handshake.extensions\_alpn\_str\_len, tls.handshake.extensions\_alpn\_str, tls.handshake.sig\_hash\_alg}
+\end{tabular}
+
+\end{small}
+
+\vspace{1em}
+\noindent
+\texttt{tshark} writes these fields into CSV files. Each row corresponds
+to a single packet of encrypted resolver traffic, and each column
+corresponds to one of the observable metadata fields listed above.
+In subsequent processing, we treat these columns as our raw feature set
+for DoT/DoH and derive per-flow/per-visit statistics from them; at no
+point do we inspect or rely on decrypted DNS contents.
+
+\subsection{Machine Learning Model Training}
+
+\todo[inline]{This section is mostly sketched out by Claude. I will fill it in with the method we end up following but just wanted something temporary to guide the work.}
+
+Our primary goal is twofold: (1) quantify how accurately an on-path adversary could infer the visited website from encrypted resolver traffic, and (2) identify which observable features contribute most to that inference, and how these contributions differ across DoT, DoH, and DoQ.
+After feature extraction, we aggregate the per-packet fields into a single feature vector for each (website, protocol, repetition) capture. Each dnsperf run for a given website and protocol produces one row in our dataset, labeled with the corresponding website. Because each run is generated at a relatively high query rate over tens of seconds, each feature vector aggregates statistics over hundreds to thousands of packets, so individual samples are based on stable distributions rather than a small number of noisy observations. For each protocol, this yields approximately 600 samples (30 websites × 20 repeated runs per website).
+We model website identification as a multi-class classification problem, where the task is to predict the website label from the encrypted feature vector. For each protocol (DoT, DoH, DoQ), we construct a separate dataset and train a supervised classifier on that protocol’s samples. In our experiments, we use tree-based models (e.g., random forests or gradient-boosted trees), which are well-suited to tabular data and expose interpretable feature-importance measures.
+To evaluate performance, we apply k-fold cross-validation independently to each protocol-specific dataset. We split the samples for a given protocol into k folds, train the model on k−1 folds, and evaluate on the held-out fold, repeating this process so that each fold serves as the test set once. We report overall accuracy as well as macro-averaged precision, recall, and F1-score across folds. Following prior work on website fingerprinting, we treat macro F1 as our primary metric, since it balances precision and recall across all classes and is less sensitive to any residual imbalance in per-website sample counts. Comparing macro F1 across protocols (e.g., DoT vs. DoH vs. DoQ) allows us to assess which encrypted transport yields more distinctive fingerprints under our feature set; in this sense, the protocol with the highest F1 is “leakiest” or faultiest from a privacy perspective.
+To understand why classification succeeds for each protocol, we analyze feature importance. For the trained tree-based models, we compute feature-importance scores (e.g., Gini importance or permutation importance) within each cross-validation fold and then average these scores across folds. This yields, for each protocol, a ranking of features—such as TLS record sizes and counts, inter-arrival timing statistics, and specific handshake/extension fields—by their contribution to the classifier’s decisions. By comparing these rankings and importance values across DoT, DoH, and DoQ, we identify which leakage factors are consistently influential across all transports and which are protocol-specific. This comparison lets us characterize not only which protocol is easiest to classify (and thus most privacy-faulty), but also which classes of observable metadata are responsible for that leakage in each case.
