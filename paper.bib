@@ -144,3 +144,70 @@ series = {IMC '22}
   howpublished = {\url{https://www.top10.com}},
   note         = {Accessed: 2025-11-24}
 }
+
+@InProceedings{10.1007/978-3-031-70890-9_3,
+author="Li, Baiyang
+and Zhu, Yujia
+and Ding, Yong
+and Sun, Yong
+and Zhang, Yuedong
+and Liu, Qingyun
+and Guo, Li",
+editor="Garcia-Alfaro, Joaquin
+and Kozik, Rafa{\l}
+and Chora{\'{s}}, Micha{\l}
+and Katsikas, Sokratis",
+title="From Fingerprint to Footprint: Characterizing the Dependencies in Encrypted DNS Infrastructures",
+booktitle="Computer Security -- ESORICS 2024",
+year="2024",
+publisher="Springer Nature Switzerland",
+address="Cham",
+pages="45--64",
+abstract="Encrypted DNS protocols---DNS-over-TLS (DoT), DNS-over-HTTPS (DoH), and DNS-over-QUIC (DoQ), have been standardized and widely embraced by the industry to enhance the security and privacy of DNS transmissions. As more software and devices support encrypted DNS protocols, adopting encrypted DNS is fast becoming the prevailing trend in domain name resolution. Despite this growing trend, the dependencies within the encrypted DNS infrastructures remain largely unexplored. Key questions arise regarding the server components and third-party DNS providers that encrypted DNS servers rely on during the resolution process. Understanding these dependencies is essential for gaining a comprehensive view of the encrypted DNS ecosystem and revealing potential vulnerabilities or points of centralization that could impact the robustness and reliability of DNS services.",
+isbn="978-3-031-70890-9"
+}
+
+@misc{sharma2025measuringavailabilityresponsetimes,
+      title={Measuring the Availability and Response Times of Public Encrypted DNS Resolvers}, 
+      author={Ranya Sharma and Nick Feamster},
+      year={2025},
+      eprint={2208.04999},
+      archivePrefix={arXiv},
+      primaryClass={cs.CR},
+      url={https://arxiv.org/abs/2208.04999}, 
+}
+
+@misc{garcía2021largescalemeasurementadoption,
+      title={Large Scale Measurement on the Adoption of Encrypted DNS}, 
+      author={Sebastián García and Karel Hynek and Dmtrii Vekshin and Tomáš Čejka and Armin Wasicek},
+      year={2021},
+      eprint={2107.04436},
+      archivePrefix={arXiv},
+      primaryClass={cs.CR},
+      url={https://arxiv.org/abs/2107.04436}, 
+}
+
+@INPROCEEDINGS{10463369,
+  author={Hu, Guannan and Fukuda, Kensuke},
+  booktitle={2024 International Conference on Artificial Intelligence in Information and Communication (ICAIIC)}, 
+  title={Privacy Leakage of DNS over QUIC: Analysis and Countermeasure}, 
+  year={2024},
+  volume={},
+  number={},
+  pages={518-523},
+  keywords={Privacy;Fingerprint recognition;Information leakage;User experience;Delays;Internet;Web sites;DNS over QUIC;Privacy Leakage;Website Fingerprinting},
+  doi={10.1109/ICAIIC60209.2024.10463369}}
+
+@article{ZHAN2021108538,
+title = {Website fingerprinting on early QUIC traffic},
+journal = {Computer Networks},
+volume = {200},
+pages = {108538},
+year = {2021},
+issn = {1389-1286},
+doi = {https://doi.org/10.1016/j.comnet.2021.108538},
+url = {https://www.sciencedirect.com/science/article/pii/S1389128621004618},
+author = {Pengwei Zhan and Liming Wang and Yi Tang},
+keywords = {Website fingerprinting, QUIC, Encrypted traffic},
+abstract = {Cryptographic protocols have been widely used to protect the user’s privacy and avoid exposing private information. QUIC (Quick UDP Internet Connections), including the version originally designed by Google (GQUIC) and the version standardized by IETF (IQUIC), as alternatives to the traditional HTTP, demonstrate their unique transmission characteristics: based on UDP for encrypted resource transmitting, accelerating web page rendering. However, existing encrypted transmission schemes based on TCP are vulnerable to website fingerprinting (WFP) attacks, allowing adversaries to infer the users’ visited websites by eavesdropping on the transmission channel. Whether GQUIC and IQUIC can effectively resist such attacks is worth investigating. In this paper, we study the vulnerabilities of GQUIC, IQUIC, and HTTPS to WFP attacks from the perspective of traffic analysis. Extensive experiments show that, in the early traffic scenario, GQUIC is the most vulnerable to WFP attacks among GQUIC, IQUIC, and HTTPS, while IQUIC is more vulnerable than HTTPS, but the vulnerability of the three protocols is similar in the normal full traffic scenario. Features transferring analysis shows that most features are transferable between protocols when on normal full traffic scenario, which enable the adversary to use features proven effective on a special protocol efficiently attacking a new protocol. However, combining with the qualitative analysis of latent feature representation, we find that the transferring is inefficient when on early traffic, as GQUIC, IQUIC, and HTTPS show the significantly different magnitude of variation in the traffic distribution on early traffic. By upgrading the one-time WFP attacks to multiple WFP Top-a attacks, we find that the attack accuracy on GQUIC and IQUIC reach 95.4% and 95.5%, respectively, with only 40 packets and just using simple features, whereas reach only 60.7% when on HTTPS. Finally, by conducting the attacks on flawed networks, we also demonstrate that the vulnerability of IQUIC is only slightly dependent on the network environment.}
+}

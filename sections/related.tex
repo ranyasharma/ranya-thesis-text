@@ -1,3 +1,35 @@
 \section{Related Work}\label{sec:related}
 
-Foo\cite{reich2013modular}.
+Li et al. provide a structural view of the encrypted DNS ecosystem, asking not what leaks on the wire, 
+but who encrypted resolvers ultimately dpepend on, specifically third parties~\cite{10.1007/978-3-031-70890-9_3}. Through a hierarchical classificaiton 
+of DoT/DoH/DoQ servers and large-scale Internet measurements, they separate front-end encrypted 
+entrances from the upstream resolvers that answer queries. They introduce a Service Reliance Index (SRI) to quantify 
+how strongly a given encrypted resolver depends on specfic upstream DNS providers and find that despite many distinct encrypted
+endpoints, rougly 75\% of resolvers forward to simply the top 10 providers. This indicates substantial centralization and dependence on a
+small subset of third party DNS services. Complementing this work, Sharma and Feamster measure the availability and response times of a large set of public DoH resolvers
+from global vantage points in North America, Europe, and Asia. They find that mainstream providers both perform better and are more
+frequently exposed in client configurations, while many non-mainstream resolvers exhibit higher latency or limited replication,
+effectively steering users toward a small set of large operators even when more resolvers exist in principle. Taken together with Li et al.,
+this work suggests that encrypted DNS is centralized both in terms of infrastructure and effective performance, heightening the impact of any
+protocol or traffic-level leakage that this work seeks to characterize~\cite{sharma2025measuringavailabilityresponsetimes}. 
+
+Garcia et al. conduct a large scale, longitudinal measurement of DoH, DoT, and DoQ adoption using trafffic from an ISP 
+backbone, a large university network, and a global security company, finding that in early 2021, encrypted DNS accounted for only 0.01\% of total 
+DNS traffic~\cite{garcía2021largescalemeasurementadoption}. Usage levels were statistically stationary during that five-month window.
+Their study is the first to provide a comprehensive, cross-protocol analysis of DoH, DoT, and DoQ trends, combining traffic measurements with active
+Internet scans to identify previously unpublished DoH resolvers. However, their analysis focuses on aggregate traffic volumes and protocol 
+mix rather than user or site identifiable information. Aditionally, the measurements predate more recent deployment changes in browsers and operating systems.
+
+Hu and Fukuda study privacy leakage in DoQ by mounting website fingerprinting attacks against encrypted DNS traffic under two realistic configurations:
+a DNS proxy (BIND) forwarding to a local resolver, and direct use of the public encrypted resolver NextDNS~\cite{10463369}. They show that an on-path adversary can still classify 
+whether a visited site belongs to a sensitive category with high accuracy, and they identify packet interarrival times and packed lengths as the most discriminative features. 
+Building on this, they evaluate countermeasures such as adding random response delays and padding DNS payloads, finding that these defenses can reduce mean F1 scores
+by 20-25\%, at the cost of additional latency. This work is methodologically close to ours; however, their study is restricted to DoQ, whereas our work provides a cross protocl 
+comparison (DoT/DoH/DoQ). 
+
+Zhan et al. take a broader QUIC-centric view and analyze website fingerprinting attacks on early GQUIC, IQUIC, and HTTPS, showing that in "early traffic" scenarios, an adversary can reach 
+over 95\% accuracy on QUIC with only ~40 packets using simple traffic features, and that QUIC can be more vulnerable than HTTPS~\cite{ZHAN2021108538}. THey demonstrate that many 
+fingerpinting features transfer across transport protocols in full-traffic scenarios, suggesting that protocol changes alone do not eliminate fingerprintability.
+While their work targets end-to-end web flows rather than DNS specifically, it reinforces a key theme of this thesis: even when payloads are encrypted and protocols upgraded,
+early-flow metadata and timing patterns remain highly informative, motivating a systematic accounting of which DNS features are exposed under different encrypted DNS designs.
+
